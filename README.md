@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 **Dataset**
 <br>
-The split datasets are included in the [a relative link](data) folder.
+The split datasets are included in the [data](data) folder.
 
 ## Quick Start
 **Training**
