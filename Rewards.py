@@ -12,6 +12,7 @@ from eval import Evaluate_test
 from extractor_models import *
 import torch.nn.functional as F
 from nltk.tag.stanford import StanfordNERTagger
+from sner import Ner
 
 class Rewards:
 	def __init__(self,samples,gpt2_model,gpt2_tokenizer,eval_f,reward_names,all_extractor_models, extractor_tokenizer,extractor_field_mask_tensor):
