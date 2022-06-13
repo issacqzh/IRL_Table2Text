@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 import warnings
 import torch
@@ -29,7 +30,7 @@ class Config(object):
     nlayers = 1
     lr = 0.001
     s_epochs = 0
-    irl_epochs = 30
+    irl_epochs = 20
     rl_epochs = 0
     batch_size = 64
     dropout = 0
@@ -87,6 +88,9 @@ if torch.cuda.is_available():
         torch.cuda.manual_seed_all(args.seed)
         torch.cuda.manual_seed(args.seed)
 
+path = 'irl_all_models'
+if not os.path.exists(path):
+  os.makedirs(path)
 
 device = torch.device("cuda" if args.cuda else "cpu")
 config = Config()
@@ -290,7 +294,7 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
 
         if epoch_score > best_dev:
             torch.save({'model_state_dict': model.state_dict(
-            ), 'optimizer_state_dict': optimizer.state_dict()}, 'irl_all/'+str(irl_epoch)+'_'+args.save)
+            ), 'optimizer_state_dict': optimizer.state_dict()}, 'irl_all_models/'+str(irl_epoch)+'_'+args.save)
             print("model saved")
             best_dev=epoch_score
     if train_mode == 'sl':

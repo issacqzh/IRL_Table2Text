@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 import warnings
 import torch
@@ -29,7 +30,7 @@ class Config(object):
     lr = 0.001
     s_epochs = 0
     irl_epochs = 0
-    rl_epochs = 150
+    rl_epochs = 100
     batch_size = 64
     dropout = 0
     bidirectional = True
@@ -86,6 +87,9 @@ if torch.cuda.is_available():
         torch.cuda.manual_seed_all(args.seed)
         torch.cuda.manual_seed(args.seed)
 
+path = 'rl_all_models'
+if not os.path.exists(path):
+  os.makedirs(path)
 
 device = torch.device("cuda" if args.cuda else "cpu")
 config = Config()
@@ -287,7 +291,7 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
 
         if epoch_score > best_dev:
             torch.save({'model_state_dict': model.state_dict(
-            ), 'optimizer_state_dict': optimizer.state_dict()}, 'rl_all/'+str(irl_epoch)+'_'+args.save)
+            ), 'optimizer_state_dict': optimizer.state_dict()}, 'rl_all_models/'+str(irl_epoch)+'_'+args.save)
             print("model saved")
             best_dev = epoch_score
     if train_mode == 'sl':
@@ -353,7 +357,7 @@ def train_process(t_dataset, v_dataset, model, s_epochs, irl_epochs, rl_epochs, 
                 train_rewards(ref_rewards, r_cand_rewards, r_cand_probs, irl,
                               irl.size, seeds[i][j], args.cuda, norm_max_min, change_thresholds)
         print('rl starts')
-        r_cand_rewards, r_cand_probs = train_generator(t_dataset, v_dataset, model, 10, 1, irl.normalized_weights, eval_f, 'rl', batch_size, t_cand_rewards, norm_max_min, gpt2_model=gpt2_model,
+        r_cand_rewards, r_cand_probs = train_generator(t_dataset, v_dataset, model, 5, 1, irl.normalized_weights, eval_f, 'rl', batch_size, t_cand_rewards, norm_max_min, gpt2_model=gpt2_model,
                                                        gpt2_tokenizer=gpt2_tokenizer, all_extractor_models=all_extractor_models, extractor_tokenizer=extractor_tokenizer, reward_names=reward_names, irl_epoch=i)
     if rl_epochs:
         r_cand_rewards, r_cand_probs = train_generator(t_dataset, v_dataset, model, rl_epochs, 1, irl.normalized_weights, eval_f, 'rl', batch_size, t_cand_rewards, norm_max_min,
