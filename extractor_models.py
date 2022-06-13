@@ -1,6 +1,6 @@
 # this file returns extractor models
 
-
+from transformers.tokenization_utils_base import BatchEncoding
 from transformers import RobertaTokenizer, RobertaForQuestionAnswering, BertTokenizerFast, BertForQuestionAnswering, \
     DistilBertTokenizerFast, DistilBertTokenizer, DistilBertForQuestionAnswering
 import torch
@@ -177,7 +177,6 @@ def prepare_cache_training_data(model_type, field):
     
         ans_start_char_id = ans_start_char_id + len(question) + len(" [SEP] ")
         ans_end_char_id = ans_end_char_id + len(question) + len(" [SEP] ")
-        
         
         ans_start_token_id = inputs.char_to_token(0,ans_start_char_id)
         ans_end_token_id = inputs.char_to_token(0,ans_end_char_id)
@@ -578,35 +577,35 @@ if __name__ == "__main__":
     # print(get_year_of_birth("This is 2020."))
 
     # generate train data
-    # generate_training_data("name")
-    # generate_training_data("place_of_birth")
-    # generate_training_data("place_of_death")
-    # generate_training_data("country")
+    generate_training_data("name",0)
+    generate_training_data("place_of_birth",0)
+    generate_training_data("place_of_death",0)
+    generate_training_data("country",0)
 
     # generate val data
-    # generate_training_data("name", 1)
-    # generate_training_data("place_of_birth", 1)
-    # generate_training_data("place_of_death", 1)
-    # generate_training_data("country", 1)
+    generate_training_data("name", 1)
+    generate_training_data("place_of_birth", 1)
+    generate_training_data("place_of_death", 1)
+    generate_training_data("country", 1)
 
 
     # generate_stats()
 
-    # prepare_cache_training_data("distil-bert", "name")
-    # prepare_cache_training_data("distil-bert", "place_of_birth")
-    # prepare_cache_training_data("distil-bert", "place_of_death")
-    # prepare_cache_training_data("distil-bert", "country")
+    prepare_cache_training_data("distil-bert-fast", "name")
+    prepare_cache_training_data("distil-bert-fast", "place_of_birth")
+    prepare_cache_training_data("distil-bert-fast", "place_of_death")
+    prepare_cache_training_data("distil-bert-fast", "country")
 
     
     # training call
-    # train_extractor_model("distil-bert", "name")
-    # train_extractor_model("distil-bert", "place_of_birth")
-    # train_extractor_model("distil-bert", "place_of_death")
-    # train_extractor_model("distil-bert", "country")
+    train_extractor_model("distil-bert-fast", "name")
+    train_extractor_model("distil-bert-fast", "place_of_birth")
+    train_extractor_model("distil-bert-fast", "place_of_death")
+    train_extractor_model("distil-bert-fast", "country")
 
-    print("Testing name...")
-    model_path = "./finetuned_qa_name/model_ep_15.pth"
-    test_extractor_model("distil-bert-fast", "name", True, model_path)
+    # print("Testing name...")
+    # model_path = "./finetuned_qa_name/model_ep_15.pth"
+    # test_extractor_model("distil-bert-fast", "name", True, model_path)
 
     # print("Testing place of birth...")
     # model_path = "./finetuned_qa_place_of_birth/model_ep_5.pth"
