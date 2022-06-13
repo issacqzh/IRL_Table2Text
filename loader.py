@@ -114,24 +114,16 @@ class Table2text_seq:
         self.USE_CUDA = USE_CUDA
         if mode == 0:
             if self.type == 0:
-                path = "train_P.pkl"
-            else:
-                path = "train_A.pkl"
+                path = "data/train_P.pkl"
         elif mode == 1:
             if self.type == 0:
-                path = "valid_P.pkl"
-            else:
-                path = "valid_A.pkl"
+                path = "data/valid_P.pkl"
         elif mode ==2:
             if self.type == 0:
-                path = "train_P.pkl"
-            else:
-                path = "train_A.pkl"
+                path = "data/train_P.pkl"
         else:
             if self.type == 0:
-                path = "test_P.pkl"
-            else:
-                path = "test_A.pkl"
+                path = "data/test_P.pkl"
         # samples -> [source, target, field, p_for, p_bck, table]
         self.data = self.load_data(path)
         # how many samples

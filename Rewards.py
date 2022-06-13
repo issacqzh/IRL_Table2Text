@@ -38,7 +38,7 @@ class Rewards:
 
         rewards = []
         all_refs = []
-
+        
         for i in range(len(self.facts)):
             partial_cand = full_cands[i]
             if len(partial_cand) > 1:
@@ -222,7 +222,8 @@ class Rewards:
         cand = {0: ' '.join(partial_cand)}
 
         final_scores = self.eval.evaluate(live=True, cand=cand, ref=ref)
-        return final_scores['Bleu_4']*0.01
+   
+        return final_scores['Bleu_4'][0]*0.01
 
     def bleu_1(self, partial_cand, ref):
         ref = [x for x in ref if x != '<PAD>' and x != '<EOS>' and x != '<SOS>']
@@ -230,7 +231,7 @@ class Rewards:
         cand = {0: ' '.join(partial_cand)}
 
         final_scores = self.eval.evaluate(live=True, cand=cand, ref=ref)
-        return final_scores['Bleu_1']*0.01
+        return final_scores['Bleu_1'][0]*0.01
 
     def perplexity(self, partial_cand):
         max_length = self.gpt2_model.config.n_positions

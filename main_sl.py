@@ -63,7 +63,7 @@ parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--load', type=str,  default='',
                     help='path to save the final model')
-parser.add_argument('--save', type=str,  default='params_P.pth',
+parser.add_argument('--save', type=str,  default='sl_params_P.pth',
                     help='path to save the final model')
 parser.add_argument('--mode', type=int,  default=0,
                     help='train(0)/predict_individual(1)/predict_file(2)/compute score(3) or keep train (4)')
@@ -96,11 +96,7 @@ if args.mask == 1:
 else:
     filepost = ""
 
-if args.type == 1:
-    args.save = 'params_A.pkl'
-    filepost += "_A.txt"
-else:
-    filepost += "_P.txt"
+
 
 t_dataset = Table2text_seq(
     0, type=args.type, USE_CUDA=args.cuda, batch_size=config.batch_size)
@@ -258,7 +254,6 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
         epoch_loss /= epoch_examples_total
         log_msg = "Finished epoch %d with losses: %.4f" % (epoch, epoch_loss)
         print(log_msg)
-
         if epoch % 5 == 0 or epoch == n_epochs:
             beam_search_model = Seq2seq(
                 model.encoder, TopKDecoder(model.decoder, 3))
@@ -278,18 +273,17 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
             print('ref rewards: ', np.sum(np.concatenate(ref_rewards), 0))
             print('cand rewards: ', np.sum(np.concatenate(cand_rewards), 0))
             final_scores = eval_f.evaluate(live=True, cand=cand, ref=ref)
-            print('Bleu_1: ', final_scores['Bleu_1'])
-            print('Bleu_2: ', final_scores['Bleu_2'])
-            print('Bleu_3: ', final_scores['Bleu_3'])
-            print('Bleu_4: ', final_scores['Bleu_4'])
-            print('ROUGE_L: ', final_scores['ROUGE_L'])
-            epoch_score = 2*final_scores['ROUGE_L']*final_scores['Bleu_4']/(
-                final_scores['Bleu_4'] + final_scores['ROUGE_L'])
-#        torch.save({'model_state_dict':model.state_dict(),'optimizer_state_dict': optimizer.state_dict()},'pretrain_'+args.save)
+            print('Bleu_1: ', np.mean(final_scores['Bleu_1']))
+            print('Bleu_2: ', np.mean(final_scores['Bleu_2']))
+            print('Bleu_3: ', np.mean(final_scores['Bleu_3']))
+            print('Bleu_4: ', np.mean(final_scores['Bleu_4']))
+            print('ROUGE_L: ', np.mean(final_scores['ROUGE_L']))
+            epoch_score = np.mean(2*final_scores['ROUGE_L']*final_scores['Bleu_4']/(
+                final_scores['Bleu_4'] + final_scores['ROUGE_L']))
 
         if epoch_score > best_dev:
             torch.save({'model_state_dict': model.state_dict(
-            ), 'optimizer_state_dict': optimizer.state_dict()}, 'sl_1'+args.save)
+            ), 'optimizer_state_dict': optimizer.state_dict()}, args.save)
             print("model saved")
             best_dev = epoch_score
     if train_mode == 'sl':

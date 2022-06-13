@@ -270,7 +270,7 @@ def get_all_extractor_models(model_type):
     all_models["name"] = model1
     
     model2 = model_class.from_pretrained(pretrained_filename, cache_dir="./hf_cache/", return_dict=True)
-    model_path = "./finetuned_qa_place_of_birth/model_ep_5.pth"
+    model_path ="./finetuned_qa_place_of_birth/model_ep_5.pth"
     model2.load_state_dict(torch.load(model_path))
     model2 = model2.to(device)
     model2 = model2.eval()
@@ -383,7 +383,7 @@ def infer_extractor_model_with_score(model, tokenizer, field, context, ground_tr
     inputs = inputs.to(device)
 
     outputs = model(**inputs)
-
+    
     start_pos = torch.argmax(outputs.start_logits, -1)
     end_pos = torch.argmax(outputs.end_logits, -1)
     # print("start pos = ", start_pos.size())

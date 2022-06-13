@@ -4,7 +4,6 @@ import collections
 import sys
 from nltk.translate import meteor_score
 import numpy as np
-sys.path.append('pycocoevalcap')
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.rouge.rouge import Rouge
 #from pycocoevalcap.meteor.meteor import Meteor
@@ -31,7 +30,10 @@ class Evaluate_test(object):
     def score(self, ref, hypo):
         final_scores = {}
         for scorer, method in self.scorers:
-            score, scores = scorer.compute_score(ref, hypo)
+            if method == ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]:
+                score, scores = scorer.compute_score(ref, hypo,  verbose = 0)
+            else:
+                score, scores = scorer.compute_score(ref, hypo)
             if type(score) == list:
                 for m, s in zip(method, scores):
                     final_scores[m] = s

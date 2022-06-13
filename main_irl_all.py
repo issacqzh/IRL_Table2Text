@@ -61,7 +61,9 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
-parser.add_argument('--save', type=str,  default='params_P.pth',
+parser.add_argument('--load', type=str,  default='sl_params_P.pth',
+                    help='path to load the model')
+parser.add_argument('--save', type=str,  default='irl_params_P.pth',
                     help='path to save the final model')
 parser.add_argument('--mode', type=int,  default=0,
                     help='train(0)/predict_individual(1)/predict_file(2)/compute score(3) or keep train (4)')
@@ -137,7 +139,7 @@ irl = Irl(weights, config.irl_size, config.irl_lr)
 
 gpt2_model = GPT2LMHeadModel.from_pretrained(
     'gpt2', return_dict=True).to('cuda')
-gpt2_tokenizer = GPT2Tokenizer.from_pretrained('gpt2'）
+gpt2_tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 all_extractor_models=get_all_extractor_models("distil-bert-fast")
 extractor_tokenizer=get_extractor_tokenizer("distil-bert-fast")
 
@@ -275,20 +277,20 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
             print('ref rewards: ', np.sum(np.concatenate(ref_rewards), 0))
             print('cand rewards: ', np.sum(np.concatenate(cand_rewards), 0))
             final_scores=eval_f.evaluate(live=True, cand=cand, ref=ref)
-            print('Bleu_1: ', final_scores['Bleu_1'])
-            print('Bleu_2: ', final_scores['Bleu_2'])
-            print('Bleu_3: ', final_scores['Bleu_3'])
-            print('Bleu_4: ', final_scores['Bleu_4'])
-            print('ROUGE_L: ', final_scores['ROUGE_L'])
-            epoch_score=2*final_scores['ROUGE_L']*final_scores['Bleu_4'] / \
-                (final_scores['Bleu_4'] + final_scores['ROUGE_L'])
+            print('Bleu_1: ', np.mean(final_scores['Bleu_1']))
+            print('Bleu_2: ', np.mean(final_scores['Bleu_2']))
+            print('Bleu_3: ', np.mean(final_scores['Bleu_3']))
+            print('Bleu_4: ', np.mean(final_scores['Bleu_4']))
+            print('ROUGE_L: ', np.mean(final_scores['ROUGE_L']))
+            epoch_score=np.mean(2*final_scores['ROUGE_L']*final_scores['Bleu_4'] / \
+                (final_scores['Bleu_4'] + final_scores['ROUGE_L']))
 #        torch.save({'model_state_dict':model.state_dict(),'optimizer_state_dict': optimizer.state_dict()},'pretrain_3000_'+args.save)
 
 
 
         if epoch_score > best_dev:
             torch.save({'model_state_dict': model.state_dict(
-            ), 'optimizer_state_dict': optimizer.state_dict()}, 'irl_all/'+str(irl_epoch)+args.save)
+            ), 'optimizer_state_dict': optimizer.state_dict()}, 'irl_all/'+str(irl_epoch)+'_'+args.save)
             print("model saved")
             best_dev=epoch_score
     if train_mode == 'sl':
@@ -301,7 +303,7 @@ def train_generator(t_dataset, v_dataset, model, n_epochs, teacher_forcing_ratio
 
 
 def train_process(t_dataset, v_dataset, model, s_epochs, irl_epochs, rl_epochs, irl, batch_size, gpt2_model, gpt2_tokenizer, all_extractor_models, extractor_tokenizer, reward_names, normalization_rewards):
-    checkpoint=torch.load(args.save)
+    checkpoint=torch.load(args.load)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     print("model restored")
